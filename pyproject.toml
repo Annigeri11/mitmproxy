@@ -49,7 +49,7 @@ dependencies = [
     "pydivert>=2.0.3,<2.2; sys_platform == 'win32'",
     "pyOpenSSL>=22.1,<24.1",
     "pyparsing>=2.4.2,<3.2",
-    "pyperclip>=1.6.0,<1.9",
+    "pyperclip>=1.6.0,<1.12",
     "ruamel.yaml>=0.16,<0.19",
     "sortedcontainers>=2.3,<2.5",
     "tornado>=6.2,<7",
