@@ -55,11 +55,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - run: printenv
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.py }}
       - run: pip install tox
@@ -93,15 +93,15 @@ jobs:
     env:
       CI_BUILD_KEY: ${{ secrets.CI_BUILD_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .github/python-version.txt
       - if: matrix.platform == 'windows'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: release/installbuilder/setup
           key: installbuilder
@@ -110,7 +110,7 @@ jobs:
       - if: startsWith(matrix.platform, 'macos') && github.repository == 'mitmproxy/mitmproxy'
             && (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/'))
         id: keychain
-        uses: apple-actions/import-codesign-certs@493007ed063995cf2d4fbca064704150548f8bb5
+        uses: apple-actions/import-codesign-certs@2429e2f9ca182c1e26e6b2ab9928f7c2aae31703
         with:
           keychain: ${{ runner.temp }}/temp
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
@@ -135,7 +135,7 @@ jobs:
             (github.ref == 'refs/heads/citest' || startsWith(github.ref, 'refs/tags/'))
         run: python -u release/build.py --dirty installbuilder-installer msix-installer
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           # artifacts must have different names, see https://github.com/actions/upload-artifact/issues/24
           name: binaries.${{ matrix.platform }}
@@ -145,14 +145,14 @@ jobs:
   test-web-ui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .github/node-version.txt
       - name: Cache Node.js modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ~/.npm
@@ -171,10 +171,10 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .github/python-version.txt
       - run: |
@@ -183,7 +183,7 @@ jobs:
           sudo dpkg -i hugo*.deb
       - run: pip install -e .[dev]
       - run: ./docs/build.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/public
@@ -193,7 +193,7 @@ jobs:
         env:
           DOCS_ARCHIVE: true
       - if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-archive
           path: docs/public
@@ -227,18 +227,18 @@ jobs:
       DOCKER_USERNAME: mitmbot
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .github/python-version.txt
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: binaries.linux
           path: release/dist
-      - uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
-      - uses: docker/setup-buildx-action@0d103c3126aa41d772a8362f6aa67afac040f80c # v1.6.0
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v1.6.0
       - run: python release/build-and-deploy-docker.py
 
   deploy:
@@ -264,10 +264,10 @@ jobs:
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version-file: .github/python-version.txt
       - run: sudo apt-get update
@@ -275,28 +275,28 @@ jobs:
       - if: startsWith(github.ref, 'refs/tags/')
         run: sudo apt-get install -y twine
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: docs
           path: docs/public
       - if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: docs-archive
           path: docs/archive
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: binaries.windows
           path: release/dist
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: binaries.linux
           path: release/dist
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: binaries.macos-x86_64
           path: release/dist
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: binaries.macos-arm64
           path: release/dist
